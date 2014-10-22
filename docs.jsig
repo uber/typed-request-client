@@ -22,13 +22,11 @@ type HandlerOptions : {
 }
 
 type TypedRequest : {
-    method: "OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" |
-        "DELETE" | "TRACE" | "PATCH",
     url: String,
-    params: Object<String, String>,
-    query: Object<String, String>
-    httpVersion: String,
-    headers: Object<String, String>,
+    method?: "OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" |
+        "DELETE" | "TRACE" | "PATCH",
+    query?: Object<String, String>,
+    headers?: Object<String, String>,
     body?: Any
 }
 
