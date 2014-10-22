@@ -43,6 +43,6 @@ function writeStats(emitter, options) {
             clientName,
             resource,
             'total-time'
-        ]);
+        ], delta);
     }
 }
