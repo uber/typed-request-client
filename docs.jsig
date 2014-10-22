@@ -1,0 +1,58 @@
+type JSONSchema<containingType: S> : Object
+type Statsd : Object
+type MikealRequest : Function
+
+type HandlerOptions : {
+    requestSchema: JSONSchema,
+    responseSchema: JSONSchema,
+    resource: String
+}
+
+type TypedRequest : {
+    method: "OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" |
+        "DELETE" | "TRACE" | "PATCH",
+    url: String,
+    params: Object<String, String>,
+    query: Object<String, String>
+    httpVersion: String,
+    headers: Object<String, String>,
+    body?: Any
+}
+
+type TypedResponse : {
+    httpVersion: String,
+    statusCode: Number,
+    headers: Object<String, String>
+    body?: Any
+}
+
+sirvice/typed-request-client : ({
+    clientName: String,
+    statsd: Statsd,
+    request?: MikealRequest,
+    now?: () => Number
+}) => (
+    typedRequest: TypedRequest,
+    opts: HandlerOptions,
+    cb: (Error, TypedResponse) => void
+) => void
+
+type ValidationError : Error & {
+    message: String,
+    type: 'ValidationError',
+    errors: Array<Error>
+}
+
+type Result<O, E <: Error> => {
+    type: 'ok',
+    ok: O,
+    error: null
+} | {
+    type: 'error',
+    ok: null,
+    error: E
+}
+
+sirvice/typed-request-client/validate-shape : (
+    shape: T, schema: JSONSchema<S>
+) => Result<ValidationError, S <: T>
