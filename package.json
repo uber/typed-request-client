@@ -1,0 +1,60 @@
+{
+  "name": "typed-request-client",
+  "version": "1.0.0",
+  "description": "Make HTTP requests using TypedRequest and TypedResponse objects.",
+  "keywords": [],
+  "author": "Raynos <raynos2@gmail.com>",
+  "repository": "git://github.com/uber/typed-request-client.git",
+  "main": "index",
+  "homepage": "https://github.com/uber/typed-request-client",
+  "bugs": {
+    "url": "https://github.com/uber/typed-request-client/issues",
+    "email": "raynos2@gmail.com"
+  },
+  "dependencies": {
+    "airlock": "^2.1.0",
+    "error": "^4.1.1",
+    "glob": "^4.0.5",
+    "jayschema": "^0.3.1",
+    "jayschema-error-messages": "^1.0.2",
+    "json-schema-filter": "git+ssh://gitolite@code.uber.internal:github/uber/json-schema-filter#v0.1.4-empty-properties2",
+    "request": "^2.44.0"
+  },
+  "devDependencies": {
+    "body": "^4.5.0",
+    "coveralls": "^2.10.0",
+    "format-stack": "^2.0.0",
+    "istanbul": "^0.2.16",
+    "jscs": "^1.6.2",
+    "jshint": "^2.5.0",
+    "opn": "^0.1.2",
+    "pre-commit": "0.0.5",
+    "send-data": "^3.3.3",
+    "tap-spec": "^0.1.8",
+    "tape": "^3.0.0"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/uber/typed-request-client/raw/master/LICENSE"
+    }
+  ],
+  "scripts": {
+    "test": "npm run jshint -s && npm run cover -s",
+    "fast-test": "npm run cover -s",
+    "jshint-pre-commit": "jshint --verbose $(git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\\.js$')",
+    "jshint": "jshint --verbose . && jscs .",
+    "cover": "istanbul cover --report html --print detail test/index.js && istanbul check-coverage --branches=100",
+    "view-cover": "istanbul report html && opn ./coverage/index.html",
+    "travis": "npm run cover -s && istanbul report lcov && ((cat coverage/lcov.info | coveralls) || exit 0)"
+  },
+  "engine": {
+    "node": ">= 0.8.x"
+  },
+  "pre-commit": [
+    "jshint-pre-commit",
+    "fast-test"
+  ],
+  "private": true,
+  "playdoh-version": "2.5.0"
+}
