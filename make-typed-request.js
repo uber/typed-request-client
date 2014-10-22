@@ -14,7 +14,7 @@ function makeTypedRequest(treq, opts, cb) {
         timeout: opts.timeout || DEFUALT_TIMEOUT
     };
 
-    if (treq.body) {
+    if (treq.body !== undefined) {
         reqOpts.json = treq.body;
     } else {
         reqOpts.json = true;
