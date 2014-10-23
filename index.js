@@ -12,6 +12,9 @@ module.exports = TypedRequestClient;
 
 var chain = enchain({
     statsd: StatsdClient,
+    statsdMeasure: StatsdMeasureClient,
+    statsdReportStatusCode: StatsdReportStatusCodeClient,
+    statsdReportRequestMade: StatsdReportRequestMadeClient,
     validating: ValidatingClient,
     probing: ProbingClient
 });
@@ -23,7 +26,10 @@ function TypedRequestClient(options) {
 
     return chain(makeTypedRequest)
         .probing(options)
+        .statsdMeasure(options, 'requestTime')
+        .statsdReportStatusCode(options)
         .validating(options)
+        .statsdMeasure(options, 'totalTime')
         .statsd(options)
         .valueOf();
 }
@@ -40,43 +46,62 @@ function StatsdClient(client, options) {
         });
     }
 
-    var now = options.now || Date.now;
-
     var statsEmitter = new EventEmitter();
+    options.statsEmitter = statsEmitter;
     writeStats(statsEmitter, {
         clientName: options.clientName,
         statsd: options.statsd
     });
+    return client;
+}
 
-    return statsdRequestClient;
-
-    function statsdRequestClient(treq, opts, cb) {
+function StatsdMeasureClient(client, options, metricName) {
+    var now = options.now || Date.now;
+    return responseTimeMeasuringClient;
+    function responseTimeMeasuringClient(treq, opts, cb) {
         var resource = opts.resource;
-
-        var beginRequest = now();
-        statsEmitter.emit('makeRequest', resource);
-
-        var beginProbe = now();
+        var begin = now();
         client(treq, opts, onResponse);
-
         function onResponse(err, tres) {
-            statsEmitter.emit('requestTime',
-                resource, now() - beginProbe);
+            // TODO Note that this measures the response time regardless of
+            // whether there was an error.
+            // Error times should probably not be measured.
+            var end = now();
+            var duration = end - begin;
+            var statsEmitter = options.statsEmitter;
+            statsEmitter.emit(metricName, resource, duration);
 
             if (err) {
-                // TODO make this a better error.
                 return cb(err);
             }
-
-            statsEmitter.emit('statusCode',
-                resource, tres.statusCode);
-
-            statsEmitter.emit('totalTime',
-                resource, now() - beginRequest);
-
             cb(null, tres);
-
         }
+    }
+}
+
+function StatsdReportStatusCodeClient(client, options) {
+    return statsdStatusCodeReportingClient;
+    function statsdStatusCodeReportingClient(treq, opts, cb) {
+        client(treq, opts, onResponse);
+        function onResponse(err, tres) {
+            if (err) {
+                return cb(err);
+            }
+            var resource = opts.resource;
+            var statsEmitter = options.statsEmitter;
+            statsEmitter.emit('statusCode', resource, tres.statusCode);
+            cb(null, tres);
+        }
+    }
+}
+
+function StatsdReportRequestMadeClient(client, options) {
+    return statsdRequestMadeReportingClient;
+    function statsdRequestMadeReportingClient(treq, opts, cb) {
+        var resource = opts.resource;
+        var statsEmitter = options.statsEmitter;
+        statsEmitter.emit('makeRequest', resource);
+        client(treq, opts, cb);
     }
 }
 
