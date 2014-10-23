@@ -13,6 +13,56 @@ function TypedRequestClient(options) {
     if (!options) {
         throw errors.MissingOptions();
     }
+
+    var reqOpts = {
+        prober: Prober({
+            enabled: true,
+            title: 'typed-request-client',
+            statsd: options.statsd
+        }),
+        request: options.request || globalRequest
+    };
+
+    return StatsdClient(typedRequestClient, options);
+
+    function typedRequestClient(treq, opts, cb) {
+        var requestSchema = opts.requestSchema;
+        var responseSchema = opts.responseSchema;
+
+        var result = validateShape(treq, requestSchema);
+        if (result.type === 'error') {
+            result.error.treq = treq;
+            result.error.schema = requestSchema;
+
+            // TODO make this a better error.
+            return cb(result.error);
+        }
+
+        probedRequest(result.ok, reqOpts, onResponse);
+
+        function onResponse(err, tres) {
+
+            if (err) {
+                // TODO make this a better error.
+                return cb(err);
+            }
+
+            var result = validateShape(tres, responseSchema);
+
+            if (result.type === 'error') {
+                result.error.tres = tres;
+                result.error.schema = responseSchema;
+
+                // TODO make this a better error.
+                return cb(result.error);
+            }
+
+            cb(null, result.ok);
+        }
+    }
+}
+
+function StatsdClient(client, options) {
     if (typeof options.clientName !== 'string') {
         throw errors.MissingClientName({
             optionsStr: JSON.stringify(options)
@@ -32,36 +82,16 @@ function TypedRequestClient(options) {
         statsd: options.statsd
     });
 
-    var reqOpts = {
-        prober: Prober({
-            enabled: true,
-            title: 'typed-request-client',
-            statsd: options.statsd
-        }),
-        request: options.request || globalRequest
-    };
+    return statsdRequestClient;
 
-    return typedRequestClient;
-
-    function typedRequestClient(treq, opts, cb) {
-        var requestSchema = opts.requestSchema;
-        var responseSchema = opts.responseSchema;
+    function statsdRequestClient(treq, opts, cb) {
         var resource = opts.resource;
 
         var beginRequest = now();
         statsEmitter.emit('makeRequest', resource);
 
-        var result = validateShape(treq, requestSchema);
-        if (result.type === 'error') {
-            result.error.treq = treq;
-            result.error.schema = requestSchema;
-
-            // TODO make this a better error.
-            return cb(result.error);
-        }
-
         var beginProbe = now();
-        probedRequest(result.ok, reqOpts, onResponse);
+        client(treq, opts, onResponse);
 
         function onResponse(err, tres) {
             statsEmitter.emit('requestTime',
@@ -75,20 +105,11 @@ function TypedRequestClient(options) {
             statsEmitter.emit('statusCode',
                 resource, tres.statusCode);
 
-            var result = validateShape(tres, responseSchema);
-
             statsEmitter.emit('totalTime',
                 resource, now() - beginRequest);
 
-            if (result.type === 'error') {
-                result.error.tres = tres;
-                result.error.schema = responseSchema;
+            cb(null, tres);
 
-                // TODO make this a better error.
-                return cb(result.error);
-            }
-
-            cb(null, result.ok);
         }
     }
 }
