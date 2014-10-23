@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "airlock": "^2.1.0",
+    "enchain": "0.0.1",
     "error": "^4.1.1",
     "glob": "^4.0.5",
     "jayschema": "^0.3.1",

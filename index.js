@@ -1,6 +1,7 @@
 var globalRequest = require('request');
 var Prober = require('airlock');
 var EventEmitter = require('events').EventEmitter;
+var enchain = require('enchain');
 
 var validateShape = require('./validate-shape.js');
 var makeTypedRequest = require('./make-typed-request.js');
@@ -9,22 +10,22 @@ var errors = require('./errors.js');
 
 module.exports = TypedRequestClient;
 
+var chain = enchain({
+    statsd: StatsdClient,
+    validating: ValidatingClient,
+    probing: ProbingClient
+});
+
 function TypedRequestClient(options) {
     if (!options) {
         throw errors.MissingOptions();
     }
 
-    return StatsdClient(
-        ValidatingClient(
-            ProbingClient(
-                makeTypedRequest,
-                options
-            ),
-            options
-        ),
-        options
-    );
-
+    return chain(makeTypedRequest)
+        .probing(options)
+        .validating(options)
+        .statsd(options)
+        .valueOf();
 }
 
 function StatsdClient(client, options) {
