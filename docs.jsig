@@ -1,6 +1,19 @@
+import { HttpResponse } from "node.http.jsig"
+
 type JSONSchema<containingType: S> : Object
-type Statsd : Object
-type MikealRequest : Function
+type Statsd : {
+    increment: (Array<String>) => void,
+    timing: (Array<String>, Number) => void
+}
+type MikealRequest : (opts: {
+    url: String,
+    method: String,
+    headers: Object,
+    timeout: Number,
+    json: true | Any
+}, cb: (Error, HttpResponse & {
+    body: Any
+}) => void) => void
 
 type HandlerOptions : {
     requestSchema: JSONSchema,
@@ -9,13 +22,11 @@ type HandlerOptions : {
 }
 
 type TypedRequest : {
-    method: "OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" |
-        "DELETE" | "TRACE" | "PATCH",
     url: String,
-    params: Object<String, String>,
-    query: Object<String, String>
-    httpVersion: String,
-    headers: Object<String, String>,
+    method?: "OPTIONS" | "GET" | "HEAD" | "POST" | "PUT" |
+        "DELETE" | "TRACE" | "PATCH",
+    query?: Object<String, String>,
+    headers?: Object<String, String>,
     body?: Any
 }
 
@@ -43,7 +54,7 @@ type ValidationError : Error & {
     errors: Array<Error>
 }
 
-type Result<O, E <: Error> => {
+type Result<E <: Error, O> => {
     type: 'ok',
     ok: O,
     error: null
