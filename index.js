@@ -14,32 +14,17 @@ function TypedRequestClient(options) {
         throw errors.MissingOptions();
     }
 
-    var reqOpts = {
-        prober: Prober({
-            enabled: true,
-            title: 'typed-request-client',
-            statsd: options.statsd
-        }),
-        request: options.request || globalRequest
-    };
+    return StatsdClient(
+        ValidatingClient(
+            ProbingClient(
+                makeTypedRequest,
+                options
+            ),
+            options
+        ),
+        options
+    );
 
-    return StatsdClient(ValidatingClient(typedRequestClient, options), options);
-
-    function typedRequestClient(treq, opts, cb) {
-
-        probedRequest(treq, reqOpts, onResponse);
-
-        function onResponse(err, tres) {
-
-            if (err) {
-                // TODO make this a better error.
-                return cb(err);
-            }
-
-            cb(null, tres);
-
-        }
-    }
 }
 
 function StatsdClient(client, options) {
@@ -131,9 +116,22 @@ function ValidatingClient(client, options) {
     }
 }
 
-function probedRequest(treq, opts, cb) {
-    var prober = opts.prober;
+function ProbingClient(client, options) {
+    var reqOpts = {
+        prober: Prober({
+            enabled: true,
+            title: 'typed-request-client',
+            statsd: options.statsd
+        }),
+        request: options.request || globalRequest
+    };
 
-    var thunk = makeTypedRequest.bind(null, treq, opts);
-    prober.probe(thunk, cb);
+    return probingClient;
+
+    function probingClient(treq, opts, cb) {
+        var prober = reqOpts.prober;
+        var thunk = client.bind(null, treq, reqOpts);
+        prober.probe(thunk, cb);
+
+    }
 }
