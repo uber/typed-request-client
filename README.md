@@ -163,4 +163,51 @@ You must specify a `responseSchema` which must be a valid
     JSONSchema object.
 
 This will be used to validate the `typedResponse` argument
-    coming out 
+    coming out of the callback from the outgoing HTTP request.
+
+You must specify a `resource` name which must be a string and
+    will be used when emitting stats events.
+
+#### `callback(error, typedResponse)`
+
+The `callback` to `makeReq` is the third and final argument. It
+    will get called with an `Error` or a `TypedResponse`.
+
+If you get an `Error` then that's either an IO error or a
+    validation error.
+
+If you get a `typedResponse` then that will look like:
+
+```jsig
+type TypedResponse : {
+    httpVersion: String,
+    statusCode: Number,
+    headers: Object<String, String>
+    body?: Any
+}
+```
+
+The `typedResponse` will have a `httpVersion` field that is the
+    version of HTTP used.
+
+The `typedResponse` will have a `statusCode` field that is the
+    statusCode of response to the outgoing HTTP request.
+
+The `typedResponse` will have a `headers` field that is an
+    object of heeaders returned by the outgoing HTTP request.
+
+The `body` will be the HTTP body of the HTTP response.
+
+## Installation
+
+`npm install typed-request-client`
+
+## Tests
+
+`npm test`
+
+## Contributors
+
+ - Raynos
+
+## MIT Licenced
