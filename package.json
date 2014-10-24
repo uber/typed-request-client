@@ -45,7 +45,7 @@
     "fast-test": "npm run cover -s",
     "jshint-pre-commit": "jshint --verbose $(git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\\.js$')",
     "jshint": "jshint --verbose . && jscs .",
-    "cover": "istanbul cover --report html --print detail test/index.js && istanbul check-coverage --branches=100",
+    "cover": "istanbul cover --report html --print detail test/index.js && istanbul check-coverage --lines=100 --branches=100",
     "view-cover": "istanbul report html && opn ./coverage/index.html",
     "travis": "npm run cover -s && istanbul report lcov && ((cat coverage/lcov.info | coveralls) || exit 0)"
   },
