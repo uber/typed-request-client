@@ -1,11 +1,10 @@
 var enchain = require('enchain');
+var makeTypedRequest = require('./make-typed-request.js');
+var adapters = require('./adapters.js');
 
-module.exports = enchain({
-    statsd: require('./adapters/statsd.js'),
-    statsdMeasure: require('./adapters/statsd-measure.js'),
-    statsdReportStatusCode: require('./adapters/statsd-report-status-code.js'),
-    statsdReportRequestMade:
-        require('./adapters/statsd-report-request-made.js'),
-    validating: require('./adapters/validating.js'),
-    probing: require('./adapters/probing.js')
-});
+var chain = enchain(adapters);
+
+module.exports = adapt;
+function adapt(myMakeTypedRequest) {
+    return chain(myMakeTypedRequest || makeTypedRequest);
+}

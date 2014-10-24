@@ -1,4 +1,3 @@
-var makeTypedRequest = require('./make-typed-request.js');
 var errors = require('./errors.js');
 var adapt = require('./adapt.js');
 
@@ -9,7 +8,7 @@ function TypedRequestClient(options) {
         throw errors.MissingOptions();
     }
 
-    return adapt(makeTypedRequest)
+    return adapt()
         .probing(options)
         .statsdMeasure(options, 'requestTime')
         .statsdReportStatusCode(options)

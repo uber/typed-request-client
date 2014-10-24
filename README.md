@@ -5,7 +5,7 @@ Make HTTP requests using TypedRequest and TypedResponse objects.
 ## Example
 
 ```js
-var TypedRequestClient = require('sirvice/typed-request-client');
+var TypedRequestClient = require('typed-request-client');
 var Statsd = require('lynx');
 
 var statsd = Statsd({
@@ -198,6 +198,82 @@ The `typedResponse` will have a `headers` field that is an
 
 The `body` will be the HTTP body of the HTTP response.
 
+## Extending
+
+The typed request client as exported by `typed-request-client` uses a default
+stack of configurable adapters.
+These can be customized.
+Each of these layers is exported by various modules under `adapters` and can be
+coposed as a pipeline as exported by `make-typed-request/adapt`.
+
+```js
+var adapt = require('make-typed-request/adapt');
+function MyTypedRequestClient(options) {
+    return adapt()
+        .probing(options)
+        .statsdMeasure(options, 'requestTime')
+        .statsdReportStatusCode(options)
+        .validating(options)
+        .statsdReportRequestMade(options)
+        .statsdMeasure(options, 'totalTime')
+        .statsd(options)
+        .valueOf();
+}
+```
+
+We use the `enchain` module to create fluent interfaces based on a collection
+of adapter methods.
+This layer can be bypassed.
+
+```js
+var TypedRequestClient = require('make-typed-request/make-typed-request');
+var Validating = require('make-typed-request/adapters/validating');
+var MyTypedRequestClient = Validating(TypedRequestClient, {});
+```
+
+Additional client adapters can be made as functions that accept a client as
+their first argument and return a decorated client.
+By convention we pass a shared `options` object through every adapter, but
+further arguments may be adapter instance specific.
+
+```js
+function MyAdapter(client, options, myArgument) {
+    return myClient;
+    function myClient(request, shared, respond) {
+        // Intercept request
+        client(request, shared, onResponse);
+        function onResponse(error, response) {
+            // Observe progress
+            if (error) { respond(error); }
+            // Intercept response
+            respond(null, response);
+        }
+    }
+}
+```
+
+You can then create your own adapter chain vocabulary with `enchain`.
+All of the adapters that this package provides are exported as a single object
+from `typed-request-client/adapters`, that you may mix into your own chains.
+
+```js
+var enchain = require('enchain');
+var adapt = enchain({
+    validating: require('make-typed-request/adapters').validating,
+    // etc
+    myAdapter: require('./my-adapter')
+});
+var TypedRequestClient = require('make-typed-request/make-typed-request');
+var options = {
+    requestSchema: someJSONSchemaForRequest,
+    responseSchema: someJSONSchemaForResponse
+};
+var MyTypedRequestClient = adapt(TypedRequestClient)
+    .myAdapter(options, myArgument)
+    .validating(options)
+    .valueOf()
+```
+
 ## Installation
 
 `npm install typed-request-client`
@@ -211,3 +287,4 @@ The `body` will be the HTTP body of the HTTP response.
  - Raynos
 
 ## MIT Licenced
+
