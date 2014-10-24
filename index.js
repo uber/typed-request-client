@@ -1,6 +1,6 @@
 var makeTypedRequest = require('./make-typed-request.js');
 var errors = require('./errors.js');
-var adapt = require('./adapters/adapt.js');
+var adapt = require('./adapt.js');
 
 module.exports = TypedRequestClient;
 
