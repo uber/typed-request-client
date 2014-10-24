@@ -285,6 +285,7 @@ var MyTypedRequestClient = adapt(TypedRequestClient)
 ## Contributors
 
  - Raynos
+ - Kris Kowal
 
 ## MIT Licenced
 
