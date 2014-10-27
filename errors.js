@@ -1,7 +1,7 @@
 var TypedError = require('error/typed');
 
 var MissingOptions = TypedError({
-    type: 'sirvice.typed-request-client.missing-options',
+    type: 'typed-request-client.missing-options',
     message: 'Expected options to be defined.\n' +
         'When calling `TypedRequestClient(...)` you need to ' +
         'pass an options object.\n' +
@@ -10,7 +10,7 @@ var MissingOptions = TypedError({
 });
 
 var MissingClientName = TypedError({
-    type: 'sirvice.typed-request-client.missing-clientName',
+    type: 'typed-request-client.missing-clientName',
     message: 'Expected `options.clientName` to be defined.\n' +
         'Expected to see a `clientName` property but instead ' +
         'found {optionsStr}.\n' +
@@ -20,7 +20,7 @@ var MissingClientName = TypedError({
 });
 
 var MissingStatsd = TypedError({
-    type: 'sirvice.typed-request-client.missing-statsd',
+    type: 'typed-request-client.missing-statsd',
     message: 'Expected `options.statsd` to be defined.\n' +
         'Expected to see a `statsd` property but instead ' +
         'found {optionsStr}.\n' +

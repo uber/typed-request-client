@@ -37,7 +37,7 @@ type TypedResponse : {
     body?: Any
 }
 
-sirvice/typed-request-client : ({
+typed-request-client : ({
     clientName: String,
     statsd: Statsd,
     request?: MikealRequest,
@@ -64,6 +64,6 @@ type Result<E <: Error, O> => {
     error: E
 }
 
-sirvice/typed-request-client/validate-shape : (
+typed-request-client/validate-shape : (
     shape: T, schema: JSONSchema<S>
 ) => Result<ValidationError, S <: T>
