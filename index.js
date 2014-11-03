@@ -16,5 +16,5 @@ function TypedRequestClient(options) {
         .statsdReportRequestMade(options)
         .statsdMeasure(options, 'totalTime')
         .statsd(options)
-        .valueOf();
+        .valueOf().request;
 }

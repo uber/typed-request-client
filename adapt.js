@@ -6,5 +6,5 @@ var chain = enchain(adapters);
 
 module.exports = adapt;
 function adapt(myMakeTypedRequest) {
-    return chain(myMakeTypedRequest || makeTypedRequest);
+    return chain({request: myMakeTypedRequest || makeTypedRequest});
 }

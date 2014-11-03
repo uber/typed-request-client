@@ -1,12 +1,12 @@
 var validateShape = require('../validate-shape.js');
 
-module.exports = ValidatingClient;
-function ValidatingClient(client, options) {
-    return validatingClient;
+module.exports = ValidatingRequestHandler;
+function ValidatingRequestHandler(requestHandler, options) {
+    return {request: handleValidatingRequest};
 
-    function validatingClient(treq, opts, cb) {
-        var requestSchema = opts.requestSchema;
-        var responseSchema = opts.responseSchema;
+    function handleValidatingRequest(treq, requestOptions, handleResponse) {
+        var requestSchema = requestOptions.requestSchema;
+        var responseSchema = requestOptions.responseSchema;
 
         var result = validateShape(treq, requestSchema);
         if (result.type === 'error') {
@@ -14,26 +14,26 @@ function ValidatingClient(client, options) {
             result.error.schema = requestSchema;
 
             // TODO make this a better error.
-            return cb(result.error);
+            return handleResponse(result.error);
         }
 
-        client(result.ok, opts, onResponse);
+        requestHandler.request(result.ok, requestOptions, onResponse);
 
-        function onResponse(err, tres) {
-            if (err) {
-                return cb(err);
+        function onResponse(error, response) {
+            if (error) {
+                return handleResponse(error);
             }
-            var result = validateShape(tres, responseSchema);
+            var result = validateShape(response, responseSchema);
 
             if (result.type === 'error') {
-                result.error.tres = tres;
+                result.error.tres = response;
                 result.error.schema = responseSchema;
 
                 // TODO make this a better error.
-                return cb(result.error);
+                return handleResponse(result.error);
             }
 
-            cb(null, result.ok);
+            handleResponse(null, result.ok);
         }
     }
 }

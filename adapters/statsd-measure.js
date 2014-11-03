@@ -1,12 +1,16 @@
 module.exports = StatsdMeasureClient;
-function StatsdMeasureClient(client, options, metricName) {
+function StatsdMeasureClient(requestHandler, options, metricName) {
     var now = options.now || Date.now;
-    return responseTimeMeasuringClient;
-    function responseTimeMeasuringClient(treq, opts, cb) {
-        var resource = opts.resource;
+    return {request: handleMeasuringRequest};
+    function handleMeasuringRequest(
+        request,
+        requestOptions,
+        handleMeasuredResponse
+    ) {
+        var resource = requestOptions.resource;
         var begin = now();
-        client(treq, opts, onResponse);
-        function onResponse(err, tres) {
+        requestHandler.request(request, requestOptions, handleResponse);
+        function handleResponse(error, response) {
             // TODO Note that this measures the response time regardless of
             // whether there was an error.
             // Error times should probably not be measured.
@@ -15,10 +19,10 @@ function StatsdMeasureClient(client, options, metricName) {
             var statsEmitter = options.statsEmitter;
             statsEmitter.emit(metricName, resource, duration);
 
-            if (err) {
-                return cb(err);
+            if (error) {
+                return handleMeasuredResponse(error);
             }
-            cb(null, tres);
+            handleMeasuredResponse(null, response);
         }
     }
 }
