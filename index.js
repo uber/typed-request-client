@@ -8,7 +8,7 @@ function TypedRequestClient(options) {
         throw errors.MissingOptions();
     }
 
-    return adapt()
+    var requestHandler = adapt()
         .probing(options)
         .statsdMeasure(options, 'requestTime')
         .statsdReportStatusCode(options)
@@ -16,5 +16,7 @@ function TypedRequestClient(options) {
         .statsdReportRequestMade(options)
         .statsdMeasure(options, 'totalTime')
         .statsd(options)
-        .valueOf().request;
+        .valueOf();
+
+    return requestHandler.request.bind(requestHandler);
 }

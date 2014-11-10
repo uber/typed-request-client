@@ -1,14 +1,20 @@
 module.exports = StatsdReportRequestMadeHandler;
-function StatsdReportRequestMadeHandler(handleRequest, options) {
-    return {request: handleStatsdRequestMadeReportingRequest};
-    function handleStatsdRequestMadeReportingRequest(
-        request,
-        requestOptions,
-        handleResponse
-    ) {
-        var resource = requestOptions.resource;
-        var statsEmitter = options.statsEmitter;
-        statsEmitter.emit('makeRequest', resource);
-        handleRequest.request(request, requestOptions, handleResponse);
+function StatsdReportRequestMadeHandler(requestHandler, options) {
+    if (!(this instanceof StatsdReportRequestMadeHandler)) {
+        return new StatsdReportRequestMadeHandler(requestHandler, options);
     }
+    this.requestHandler = requestHandler;
+    this.options = options;
 }
+
+StatsdReportRequestMadeHandler.prototype.request =
+function handleStatsdRequestMadeReportingRequest(
+    request,
+    requestOptions,
+    handleResponse
+) {
+    var resource = requestOptions.resource;
+    var statsEmitter = this.options.statsEmitter;
+    statsEmitter.emit('makeRequest', resource);
+    this.requestHandler.request(request, requestOptions, handleResponse);
+};

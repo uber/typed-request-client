@@ -3,7 +3,7 @@ var errors = require('../errors.js');
 var writeStats = require('../write-stats.js');
 
 module.exports = StatsdRequestHandler;
-function StatsdRequestHandler(handleRequest, options) {
+function StatsdRequestHandler(requestHandler, options) {
     if (typeof options.clientName !== 'string') {
         throw errors.MissingClientName({
             optionsStr: JSON.stringify(options)
@@ -21,5 +21,5 @@ function StatsdRequestHandler(handleRequest, options) {
         clientName: options.clientName,
         statsd: options.statsd
     });
-    return handleRequest;
+    return requestHandler;
 }
