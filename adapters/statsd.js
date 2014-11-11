@@ -2,8 +2,8 @@ var EventEmitter = require('events').EventEmitter;
 var errors = require('../errors.js');
 var writeStats = require('../write-stats.js');
 
-module.exports = StatsdClient;
-function StatsdClient(client, options) {
+module.exports = StatsdRequestHandler;
+function StatsdRequestHandler(requestHandler, options) {
     if (typeof options.clientName !== 'string') {
         throw errors.MissingClientName({
             optionsStr: JSON.stringify(options)
@@ -21,5 +21,5 @@ function StatsdClient(client, options) {
         clientName: options.clientName,
         statsd: options.statsd
     });
-    return client;
+    return requestHandler;
 }

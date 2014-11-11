@@ -1,10 +1,20 @@
-module.exports = StatsdReportRequestMadeClient;
-function StatsdReportRequestMadeClient(client, options) {
-    return statsdRequestMadeReportingClient;
-    function statsdRequestMadeReportingClient(treq, opts, cb) {
-        var resource = opts.resource;
-        var statsEmitter = options.statsEmitter;
-        statsEmitter.emit('makeRequest', resource);
-        client(treq, opts, cb);
+module.exports = StatsdReportRequestMadeHandler;
+function StatsdReportRequestMadeHandler(requestHandler, options) {
+    if (!(this instanceof StatsdReportRequestMadeHandler)) {
+        return new StatsdReportRequestMadeHandler(requestHandler, options);
     }
+    this.requestHandler = requestHandler;
+    this.options = options;
 }
+
+StatsdReportRequestMadeHandler.prototype.request =
+function handleStatsdRequestMadeReportingRequest(
+    request,
+    requestOptions,
+    handleResponse
+) {
+    var resource = requestOptions.resource;
+    var statsEmitter = this.options.statsEmitter;
+    statsEmitter.emit('makeRequest', resource);
+    this.requestHandler.request(request, requestOptions, handleResponse);
+};

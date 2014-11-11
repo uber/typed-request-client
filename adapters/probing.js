@@ -1,22 +1,28 @@
 var globalRequest = require('request');
 var Prober = require('airlock');
 
-module.exports = ProbingClient;
-function ProbingClient(client, options) {
-    var reqOpts = {
-        prober: Prober({
-            enabled: true,
-            title: 'typed-request-client',
-            statsd: options.statsd
-        }),
-        request: options.request || globalRequest
-    };
-
-    return probingClient;
-
-    function probingClient(treq, opts, cb) {
-        var prober = reqOpts.prober;
-        var thunk = client.bind(null, treq, reqOpts);
-        prober.probe(thunk, cb);
+module.exports = ProbingRequestHandler;
+function ProbingRequestHandler(requestHandler, options) {
+    if (!(this instanceof ProbingRequestHandler)) {
+        return new ProbingRequestHandler(requestHandler, options);
     }
+    this.prober = options.prober = Prober({
+        enabled: true,
+        title: 'typed-request-client',
+        statsd: options.statsd
+    });
+    // TODO consider moving this one line into a separate layer.
+    options.request = options.request || globalRequest;
+    this.requestHandler = requestHandler;
+    this.options = options;
 }
+
+ProbingRequestHandler.prototype.request =
+function handleProbingRequest(request, opts, cb) {
+    var thunk = this.requestHandler.request.bind(
+        this.requestHandler,
+        request,
+        this.options
+    );
+    this.prober.probe(thunk, cb);
+};

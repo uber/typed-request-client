@@ -1,39 +1,44 @@
 var validateShape = require('../validate-shape.js');
 
-module.exports = ValidatingClient;
-function ValidatingClient(client, options) {
-    return validatingClient;
+module.exports = ValidatingRequestHandler;
+function ValidatingRequestHandler(requestHandler) {
+    if (!(this instanceof ValidatingRequestHandler)) {
+        return new ValidatingRequestHandler(requestHandler);
+    }
+    this.requestHandler = requestHandler;
+}
 
-    function validatingClient(treq, opts, cb) {
-        var requestSchema = opts.requestSchema;
-        var responseSchema = opts.responseSchema;
+ValidatingRequestHandler.prototype.request =
+function handleValidatingRequest(treq, requestOptions, handleResponse) {
+    var self = this;
+    var requestSchema = requestOptions.requestSchema;
+    var responseSchema = requestOptions.responseSchema;
 
-        var result = validateShape(treq, requestSchema);
+    var result = validateShape(treq, requestSchema);
+    if (result.type === 'error') {
+        result.error.treq = treq;
+        result.error.schema = requestSchema;
+
+        // TODO make this a better error.
+        return handleResponse(result.error);
+    }
+
+    self.requestHandler.request(result.ok, requestOptions, onResponse);
+
+    function onResponse(error, response) {
+        if (error) {
+            return handleResponse(error);
+        }
+        var result = validateShape(response, responseSchema);
+
         if (result.type === 'error') {
-            result.error.treq = treq;
-            result.error.schema = requestSchema;
+            result.error.tres = response;
+            result.error.schema = responseSchema;
 
             // TODO make this a better error.
-            return cb(result.error);
+            return handleResponse(result.error);
         }
 
-        client(result.ok, opts, onResponse);
-
-        function onResponse(err, tres) {
-            if (err) {
-                return cb(err);
-            }
-            var result = validateShape(tres, responseSchema);
-
-            if (result.type === 'error') {
-                result.error.tres = tres;
-                result.error.schema = responseSchema;
-
-                // TODO make this a better error.
-                return cb(result.error);
-            }
-
-            cb(null, result.ok);
-        }
+        handleResponse(null, result.ok);
     }
-}
+};
