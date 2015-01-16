@@ -18,8 +18,8 @@
     "glob": "^4.0.5",
     "jayschema": "^0.3.1",
     "jayschema-error-messages": "^1.0.2",
-    "json-schema-filter": "git+ssh://gitolite@code.uber.internal:github/uber/json-schema-filter#v0.1.4-empty-properties2",
-    "request": "^2.44.0"
+    "request": "^2.44.0",
+    "uber-json-schema-filter": "^2.0.1"
   },
   "devDependencies": {
     "body": "^4.5.0",

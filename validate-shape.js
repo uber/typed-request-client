@@ -1,5 +1,5 @@
 var JaySchema = require('jayschema');
-var jsonSchemaFilter = require('json-schema-filter');
+var jsonSchemaFilter = require('uber-json-schema-filter');
 var normalize = require('jayschema-error-messages');
 var ValidationError = require('error/validation');
 
