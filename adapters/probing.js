@@ -1,5 +1,6 @@
 var globalRequest = require('request');
 var Prober = require('airlock');
+var xtend = require('xtend');
 
 module.exports = ProbingRequestHandler;
 function ProbingRequestHandler(requestHandler, options) {
@@ -19,10 +20,11 @@ function ProbingRequestHandler(requestHandler, options) {
 
 ProbingRequestHandler.prototype.request =
 function handleProbingRequest(request, opts, cb) {
+    opts = xtend(opts, {request: this.options.request});
     var thunk = this.requestHandler.request.bind(
         this.requestHandler,
         request,
-        this.options
+        opts
     );
     this.prober.probe(thunk, cb);
 };
