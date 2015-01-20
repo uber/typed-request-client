@@ -74,6 +74,7 @@ test('can make http request', function t(assert) {
         };
 
         request(treq, {
+            timeout: 100,
             requestSchema: requestSchema,
             responseSchema: responseSchema,
             resource: '.read'
@@ -90,6 +91,48 @@ test('can make http request', function t(assert) {
                 'statusCode', 'httpVersion', 'headers', 'body'
             ]);
 
+            server.close();
+            assert.end();
+        }
+    });
+});
+
+test('respects timeout', function t(assert) {
+    var server = http.createServer(function onReq(req, res) {
+        var timeout = setTimeout(function() {
+            sendJson(req, res, {
+                statusCode: 200,
+                body: {}
+            });
+        }, 300);
+        timeout.unref();
+    });
+    server.listen(0, function onPort() {
+        var port = server.address().port;
+
+        var request = TypedRequestClient({
+            clientName: 'demo',
+            statsd: fakeStatsd
+        });
+
+        var treq = {
+            url: 'http://localhost:' + port + '/',
+            method: 'GET',
+            headers: {},
+            body: {
+                'foo': 'bar'
+            }
+        };
+
+        request(treq, {
+            timeout: 100,
+            requestSchema: requestSchema,
+            responseSchema: responseSchema,
+            resource: '.read'
+        }, onResponse);
+
+        function onResponse(err) {
+            assert.equal(err.code, 'ETIMEDOUT');
             server.close();
             assert.end();
         }
