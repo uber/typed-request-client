@@ -19,7 +19,7 @@
     "jayschema": "^0.3.1",
     "jayschema-error-messages": "^1.0.2",
     "request": "^2.44.0",
-    "uber-json-schema-filter": "^2.0.1",
+    "uber-json-schema-filter": "^2.0.2",
     "xtend": "^4.0.0"
   },
   "devDependencies": {
