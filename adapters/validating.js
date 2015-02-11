@@ -29,16 +29,23 @@ function handleValidatingRequest(treq, requestOptions, handleResponse) {
         if (error) {
             return handleResponse(error);
         }
-        var result = validateShape(response, responseSchema);
 
-        if (result.type === 'error') {
-            result.error.tres = response;
-            result.error.schema = responseSchema;
+        if (response.statusCode < 400 ||
+            response.statusCode >= 600
+        ) {
+            var result = validateShape(response, responseSchema);
 
-            // TODO make this a better error.
-            return handleResponse(result.error);
+            if (result.type === 'error') {
+                result.error.tres = response;
+                result.error.schema = responseSchema;
+
+                // TODO make this a better error.
+                return handleResponse(result.error);
+            }
+
+            handleResponse(null, result.ok);
+        } else {
+            handleResponse(null, response);
         }
-
-        handleResponse(null, result.ok);
     }
 };
