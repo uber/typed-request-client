@@ -97,9 +97,57 @@ test('can make http request', function t(assert) {
     });
 });
 
+test('passes 500 right through', function t(assert) {
+    var server = http.createServer(function onReq(req, res) {
+        sendJson(req, res, {
+            statusCode: 500,
+            body: { message: 'sad' }
+        });
+    });
+    server.listen(0, function onPort() {
+        var port = server.address().port;
+
+        var request = TypedRequestClient({
+            clientName: 'demo',
+            statsd: fakeStatsd
+        });
+
+        var treq = {
+            url: 'http://localhost:' + port + '/',
+            method: 'GET',
+            headers: {},
+            body: {
+                'foo': 'bar'
+            }
+        };
+
+        request(treq, {
+            timeout: 100,
+            requestSchema: requestSchema,
+            responseSchema: responseSchema,
+            resource: '.read'
+        }, onResponse);
+
+        function onResponse(err, tres) {
+            assert.ifError(err);
+
+            assert.equal(tres.statusCode, 500);
+            assert.equal(tres.httpVersion, '1.1');
+            // assert.deepEqual(tres.headers, {});
+            assert.deepEqual(tres.body, { message: 'sad' });
+            assert.deepEqual(Object.keys(tres), [
+                 'httpVersion', 'headers', 'statusCode', 'body'
+            ]);
+
+            server.close();
+            assert.end();
+        }
+    });
+});
+
 test('respects timeout', function t(assert) {
     var server = http.createServer(function onReq(req, res) {
-        var timeout = setTimeout(function() {
+        var timeout = setTimeout(function onTimeout() {
             sendJson(req, res, {
                 statusCode: 200,
                 body: {}
@@ -132,7 +180,10 @@ test('respects timeout', function t(assert) {
         }, onResponse);
 
         function onResponse(err) {
-            assert.equal(err.code, 'ETIMEDOUT');
+            assert.ok(
+                err.code === 'ETIMEDOUT' ||
+                err.code === 'ESOCKETTIMEDOUT'
+            );
             server.close();
             assert.end();
         }
