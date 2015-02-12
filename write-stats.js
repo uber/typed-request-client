@@ -15,7 +15,7 @@ function writeStats(emitter, options) {
             clientName,
             resource,
             'request'
-        ]);
+        ].join('.'));
     }
 
     function onRequestTime(resource, delta) {
@@ -24,7 +24,7 @@ function writeStats(emitter, options) {
             clientName,
             resource,
             'request-time'
-        ], delta);
+        ].join('.'), delta);
     }
 
     function onStatusCode(resource, statusCode) {
@@ -34,7 +34,7 @@ function writeStats(emitter, options) {
             resource,
             'statusCode',
             statusCode
-        ]);
+        ].join('.'));
     }
 
     function onTotalTime(resource, delta) {
@@ -43,6 +43,6 @@ function writeStats(emitter, options) {
             clientName,
             resource,
             'total-time'
-        ], delta);
+        ].join('.'), delta);
     }
 }
