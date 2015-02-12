@@ -1,6 +1,6 @@
 {
   "name": "typed-request-client",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "Make HTTP requests using TypedRequest and TypedResponse objects.",
   "keywords": [],
   "author": "Raynos <raynos2@gmail.com>",
