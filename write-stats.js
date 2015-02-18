@@ -9,40 +9,23 @@ function writeStats(emitter, options) {
     emitter.on('statusCode', onStatusCode);
     emitter.on('totalTime', onTotalTime);
 
+    function sanitize(statStr) {
+        return statStr.replace(/{|}/g, '');
+    }
+
     function onMakeRequest(resource) {
-        statsd.increment([
-            'typed-request-client',
-            clientName,
-            resource,
-            'request'
-        ].join('.'));
+        statsd.increment(sanitize('typed-request-client.' + clientName + '.' + resource + '.request'));
     }
 
     function onRequestTime(resource, delta) {
-        statsd.timing([
-            'typed-request-client',
-            clientName,
-            resource,
-            'request-time'
-        ].join('.'), delta);
+        statsd.timing(sanitize('typed-request-client.' + clientName + '.' + resource + '.request-time'), delta);
     }
 
     function onStatusCode(resource, statusCode) {
-        statsd.increment([
-            'typed-request-client',
-            clientName,
-            resource,
-            'statusCode',
-            statusCode
-        ].join('.'));
+        statsd.increment(sanitize('typed-request-client.' + clientName + '.' + resource + '.statusCode.' + statusCode));
     }
 
     function onTotalTime(resource, delta) {
-        statsd.timing([
-            'typed-request-client',
-            clientName,
-            resource,
-            'total-time'
-        ].join('.'), delta);
+        statsd.timing(sanitize('typed-request-client.' + clientName + '.' + resource + '.total-time'), delta);
     }
 }
