@@ -1,15 +1,23 @@
 var globalRequest = require('request');
 var Prober = require('airlock');
 var xtend = require('xtend');
+var errors = require('../errors.js');
 
 module.exports = ProbingRequestHandler;
 function ProbingRequestHandler(requestHandler, options) {
     if (!(this instanceof ProbingRequestHandler)) {
         return new ProbingRequestHandler(requestHandler, options);
     }
+
+    if (typeof options.clientName !== 'string') {
+        throw errors.MissingClientName({
+            optionsStr: JSON.stringify(options)
+        });
+    }
+
     this.prober = options.prober = Prober({
         enabled: true,
-        title: 'typed-request-client',
+        title: 'typed-request-client.' + options.clientName,
         statsd: options.statsd
     });
     // TODO consider moving this one line into a separate layer.
