@@ -23,25 +23,29 @@ function createTestData(resource, statKeyPart) {
         makeRequest: {
             args: [resource],
             eventName: 'makeRequest',
-            statKey: 'typed-request-client.myclient.' + (statKeyPart || resource) + '.request'
+            statKey: 'typed-request-client.myclient.' +
+                (statKeyPart || resource) + '.request'
         },
         requestTime: {
             args: [resource, 1],
             eventName: 'requestTime',
-            statKey: 'typed-request-client.myclient.' + (statKeyPart || resource) + '.request-time'
+            statKey: 'typed-request-client.myclient.' +
+                (statKeyPart || resource) + '.request-time'
         },
         statusCode: {
             args: [resource, 200],
             eventName: 'statusCode',
-            statKey: 'typed-request-client.myclient.' + (statKeyPart || resource) + '.statusCode.200'
+            statKey: 'typed-request-client.myclient.' +
+                (statKeyPart || resource) + '.statusCode.200'
         },
         totalTime: {
             args: [resource],
             eventName: 'totalTime',
-            statKey: 'typed-request-client.myclient.' + (statKeyPart || resource) + '.total-time'
+            statKey: 'typed-request-client.myclient.' +
+                (statKeyPart || resource) + '.total-time'
         }
     };
-};
+}
 
 function emitStat(testData, statsd) {
     var emitter = new EventEmitter();
