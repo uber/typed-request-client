@@ -4,6 +4,7 @@ var writeStats = require('../write-stats.js');
 
 module.exports = StatsdRequestHandler;
 function StatsdRequestHandler(requestHandler, options) {
+    /* istanbul ignore if */
     if (typeof options.clientName !== 'string') {
         throw errors.MissingClientName({
             optionsStr: JSON.stringify(options)

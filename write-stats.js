@@ -14,18 +14,22 @@ function writeStats(emitter, options) {
     }
 
     function onMakeRequest(resource) {
-        statsd.increment(sanitize('typed-request-client.' + clientName + '.' + resource + '.request'));
+        statsd.increment(sanitize('typed-request-client.' + clientName +
+            '.' + resource + '.request'));
     }
 
     function onRequestTime(resource, delta) {
-        statsd.timing(sanitize('typed-request-client.' + clientName + '.' + resource + '.request-time'), delta);
+        statsd.timing(sanitize('typed-request-client.' + clientName +
+            '.' + resource + '.request-time'), delta);
     }
 
     function onStatusCode(resource, statusCode) {
-        statsd.increment(sanitize('typed-request-client.' + clientName + '.' + resource + '.statusCode.' + statusCode));
+        statsd.increment(sanitize('typed-request-client.' + clientName +
+            '.' + resource + '.statusCode.' + statusCode));
     }
 
     function onTotalTime(resource, delta) {
-        statsd.timing(sanitize('typed-request-client.' + clientName + '.' + resource + '.total-time'), delta);
+        statsd.timing(sanitize('typed-request-client.' + clientName +
+            '.' + resource + '.total-time'), delta);
     }
 }
