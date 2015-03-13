@@ -11,7 +11,8 @@ function makeTypedRequest(treq, opts, cb) {
         url: treq.url,
         method: treq.method || 'GET',
         headers: treq.headers || {},
-        timeout: opts.timeout || DEFUALT_TIMEOUT
+        timeout: opts.timeout || DEFUALT_TIMEOUT,
+        transformUrlFn: opts.transformUrlFn || undefined
     };
 
     if (treq.body !== undefined) {
@@ -23,6 +24,10 @@ function makeTypedRequest(treq, opts, cb) {
     if (treq.query) {
         reqOpts.url = reqOpts.url + '?' +
             querystring.stringify(treq.query);
+    }
+
+    if (typeof reqOpts.transformUrlFn === 'function') {
+        reqOpts.url = reqOpts.transformUrlFn(reqOpts.url);
     }
 
     request(reqOpts, onResponse);

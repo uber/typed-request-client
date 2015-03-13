@@ -61,7 +61,7 @@ test('can make request', function t(assert) {
             });
 
             assert.deepEqual(Object.keys(opts), [
-                'url', 'method', 'headers', 'timeout', 'json'
+                'url', 'method', 'headers', 'timeout', 'transformUrlFn', 'json'
             ]);
 
             cb(null, {
