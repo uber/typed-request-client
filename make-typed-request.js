@@ -11,7 +11,8 @@ function makeTypedRequest(treq, opts, cb) {
         url: treq.url,
         method: treq.method || 'GET',
         headers: treq.headers || {},
-        timeout: opts.timeout || DEFUALT_TIMEOUT
+        timeout: opts.timeout || DEFUALT_TIMEOUT,
+        transformUrlFn: opts.transformUrlFn || undefined
     };
 
     if (treq.body !== undefined) {
@@ -25,6 +26,10 @@ function makeTypedRequest(treq, opts, cb) {
             querystring.stringify(treq.query);
     }
 
+    if (typeof reqOpts.transformUrlFn === 'function') {
+        reqOpts.url = reqOpts.transformUrlFn(reqOpts.url);
+    }
+
     request(reqOpts, onResponse);
 
     function onResponse(err, resp) {
@@ -36,7 +41,8 @@ function makeTypedRequest(treq, opts, cb) {
             httpVersion: resp.httpVersion,
             headers: resp.headers,
             statusCode: resp.statusCode,
-            body: resp.body
+            body: resp.body,
+            requestUrl: reqOpts.url
         };
 
         cb(null, tres);
