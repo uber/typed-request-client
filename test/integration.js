@@ -136,7 +136,7 @@ test('passes 500 right through', function t(assert) {
             // assert.deepEqual(tres.headers, {});
             assert.deepEqual(tres.body, { message: 'sad' });
             assert.deepEqual(Object.keys(tres), [
-                 'httpVersion', 'headers', 'statusCode', 'body'
+                 'httpVersion', 'headers', 'statusCode', 'body', 'requestUrl'
             ]);
 
             server.close();
