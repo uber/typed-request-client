@@ -248,3 +248,44 @@ test('request that has 500', function t(assert) {
         }
     });
 });
+
+test('request that has transformUrlFn', function t(assert) {
+    var server = createServer(function onPort(port) {
+        var treq = {
+            method: 'GET',
+            url: 'http://localhost:' + port + '/',
+            query: { prop: ['a,b', 'c,d']},
+            body: { 'hello': 'world' }
+        };
+
+        var transformReqOpts = {
+            // special request to return the modified query
+            request: function r(opts, cb) {
+                assert.equal(opts.url, treq.url + '?prop=a,b&prop=c,d');
+
+                cb(null, {
+                    statusCode: 200,
+                    httpVersion: '1.1',
+                    headers: {},
+                    body: {}
+                });
+            }
+        };
+
+        function transformUrlFn(url) {
+            // Restore all the ',' from being stringify'ed
+            return url.replace(/%2C/g, ',');
+        }
+
+        transformReqOpts.transformUrlFn = transformUrlFn;
+
+        makeTypedRequest(treq, transformReqOpts, onResponse);
+
+        function onResponse(err, resp) {
+            assert.ifError(err);
+
+            server.close();
+            assert.end();
+        }
+    });
+});
