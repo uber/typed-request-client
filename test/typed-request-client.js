@@ -25,6 +25,7 @@ var requestSchema = {
         'url': { type: 'string' },
         'method': { type: 'string' },
         'headers': { type: 'object' },
+        'query': { type: 'object' },
         'body': {
             type: 'object',
             properties: {
@@ -199,6 +200,48 @@ test('response error', function t(assert) {
 
         assert.equal(err.message, 'Required');
         assert.equal(err.attribute, 'body');
+
+        assert.end();
+    }
+});
+
+test('response with nonstringified query', function t(assert) {
+    var treq = {
+        url: 'http://localhost:8000/',
+        method: 'GET',
+        headers: {},
+        query: { prop: ['a,b', 'c,d'] },
+        body: {
+            'foo': 'bar'
+        }
+    };
+
+    var request = TypedRequestClient({
+        clientName: 'demo',
+        statsd: fakeStatsd,
+        request: function r(opts, cb) {
+            assert.equal(opts.url, treq.url + '?prop=a,b&prop=c,d');
+            cb(null, {
+                statusCode: 200,
+                httpVersion: '1.1',
+                headers: {},
+                body: {}
+            });
+        }
+    });
+
+    request(treq, {
+        requestSchema: requestSchema,
+        responseSchema: responseSchema,
+        resource: '.read',
+        transformUrlFn: function transform(url) {
+            return url.replace(/%2C/g, ',');
+        }
+    }, onResponse);
+
+    function onResponse(err, tres) {
+        assert.ifError(err);
+        assert.equal(tres.httpVersion, '1.1');
 
         assert.end();
     }
