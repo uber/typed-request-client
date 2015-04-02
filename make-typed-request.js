@@ -1,3 +1,5 @@
+'use strict';
+
 var querystring = require('querystring');
 
 var DEFUALT_TIMEOUT = 30 * 1000;

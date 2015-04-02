@@ -1,17 +1,19 @@
+'use strict';
+
 var JaySchema = require('jayschema');
-var jsonSchemaFilter = require('uber-json-schema-filter');
 var normalize = require('jayschema-error-messages');
 var ValidationError = require('error/validation');
 
-var Result = require('./result.js');
+module.exports = ValidateShape;
 
-module.exports = validateShape;
+function ValidateShape() {
+    this.js = new JaySchema();
+}
+
+ValidateShape.prototype.validate = validateShape;
 
 function validateShape(shape, schema) {
-    var js = new JaySchema();
-
-    shape = jsonSchemaFilter(schema, shape);
-    var validationErrors = js.validate(shape, schema);
+    var validationErrors = this.js.validate(shape, schema);
 
     if (validationErrors.length > 0) {
         var fields = normalize(validationErrors).fields;
@@ -19,10 +21,10 @@ function validateShape(shape, schema) {
         var err = ValidationError(errors);
         err.attribute = errors[0].attribute;
         err.original = validationErrors;
-        return Result.Error(err);
-    } else {
-        return Result.Ok(shape);
+        return err;
     }
+
+    return null;
 }
 
 /* ```jsig

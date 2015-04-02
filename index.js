@@ -1,3 +1,5 @@
+'use strict';
+
 var errors = require('./errors.js');
 var adapt = require('./adapt.js');
 

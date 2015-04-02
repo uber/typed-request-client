@@ -1,4 +1,7 @@
-var validateShape = require('../validate-shape.js');
+'use strict';
+
+var ValidateShape = require('../validate-shape.js');
+var filter = require('uber-json-schema-filter');
 
 module.exports = ValidatingRequestHandler;
 function ValidatingRequestHandler(requestHandler) {
@@ -6,46 +9,86 @@ function ValidatingRequestHandler(requestHandler) {
         return new ValidatingRequestHandler(requestHandler);
     }
     this.requestHandler = requestHandler;
+    this.shape = new ValidateShape();
 }
 
-ValidatingRequestHandler.prototype.request =
+ValidatingRequestHandler.prototype.request = handleValidatingRequest;
+ValidatingRequestHandler.prototype.response = handleValidatingResponse;
+ValidatingRequestHandler.prototype.validateRequest = validateRequest;
+ValidatingRequestHandler.prototype.validateResponse = validateResponse;
+
 function handleValidatingRequest(treq, requestOptions, handleResponse) {
     var self = this;
+    var filterEnabled = requestOptions.filterRequest;
+    var validationEnabled = requestOptions.validateRequest;
     var requestSchema = requestOptions.requestSchema;
-    var responseSchema = requestOptions.responseSchema;
 
-    var result = validateShape(treq, requestSchema);
-    if (result.type === 'error') {
-        result.error.treq = treq;
-        result.error.schema = requestSchema;
-
-        // TODO make this a better error.
-        return handleResponse(result.error);
+    if (filterEnabled) {
+        treq = filter(requestSchema, treq);
     }
 
-    self.requestHandler.request(result.ok, requestOptions, onResponse);
-
-    function onResponse(error, response) {
+    if (validationEnabled) {
+        var error = self.validateRequest(treq, requestSchema);
         if (error) {
             return handleResponse(error);
         }
+    }
 
-        if (response.statusCode < 400 ||
-            response.statusCode >= 600
-        ) {
-            var result = validateShape(response, responseSchema);
+    self.requestHandler.request(
+        treq,
+        requestOptions,
+        validatingRequestCallback
+    );
 
-            if (result.type === 'error') {
-                result.error.tres = response;
-                result.error.schema = responseSchema;
+    function validatingRequestCallback(err, tres) {
+        self.response(err, tres, requestOptions, handleResponse);
+    }
+}
 
-                // TODO make this a better error.
-                return handleResponse(result.error);
-            }
+function handleValidatingResponse(err, tres, requestOptions, handleResponse) {
+    if (err) {
+        return handleResponse(err);
+    }
 
-            handleResponse(null, result.ok);
-        } else {
-            handleResponse(null, response);
+    var statusCode = tres.statusCode;
+    var validate = statusCode < 400 || statusCode >= 600;
+    var filterEnabled = validate && requestOptions.filterResponse;
+    var validationEnabled = validate && requestOptions.validateResponse;
+    var responseSchema = requestOptions.responseSchema;
+
+    if (filterEnabled) {
+        tres = filter(responseSchema, tres);
+    }
+
+    if (validationEnabled) {
+        var error = this.validateResponse(tres, responseSchema);
+
+        if (error) {
+            return handleResponse(error);
         }
     }
-};
+
+    handleResponse(null, tres);
+}
+
+function validateRequest(treq, schema) {
+    var error = this.shape.validate(treq, schema);
+
+    if (error) {
+        error.treq = treq;
+        error.schema = schema;
+    }
+
+    return error;
+}
+
+function validateResponse(tres, schema) {
+    var error = this.shape.validate(tres, schema);
+
+    if (error) {
+        error.tres = tres;
+        error.schema = schema;
+    }
+
+    return error;
+}

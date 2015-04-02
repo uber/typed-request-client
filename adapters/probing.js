@@ -1,3 +1,5 @@
+'use strict';
+
 var globalRequest = require('request');
 var Prober = require('airlock');
 var xtend = require('xtend');

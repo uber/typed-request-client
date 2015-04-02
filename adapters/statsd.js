@@ -1,3 +1,5 @@
+'use strict';
+
 var EventEmitter = require('events').EventEmitter;
 var errors = require('../errors.js');
 var writeStats = require('../write-stats.js');

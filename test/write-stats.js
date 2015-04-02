@@ -1,3 +1,5 @@
+'use strict';
+
 var EventEmitter = require('events').EventEmitter;
 var test = require('tape');
 var writeStats = require('../write-stats.js');

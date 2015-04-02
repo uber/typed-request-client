@@ -1,3 +1,5 @@
+'use strict';
+
 var enchain = require('enchain');
 var makeTypedRequest = require('./make-typed-request.js');
 var adapters = require('./adapters.js');

@@ -1,3 +1,5 @@
+'use strict';
+
 var test = require('tape');
 var request = require('request');
 var http = require('http');
@@ -49,7 +51,7 @@ test('can make request', function t(assert) {
         var treq = {
             method: 'GET',
             url: 'http://localhost:' + port + '/',
-            body: { 'hello': 'world' }
+            body: {'hello': 'world'}
         };
 
         makeTypedRequest(treq, reqOpts, onResponse);
@@ -81,7 +83,7 @@ test('request with POST', function t(assert) {
         var treq = {
             method: 'POST',
             url: 'http://localhost:' + port + '/',
-            body: { 'hello': 'world' }
+            body: {'hello': 'world'}
         };
 
         makeTypedRequest(treq, reqOpts, onResponse);
@@ -112,7 +114,7 @@ test('request with GET', function t(assert) {
         var treq = {
             method: 'GET',
             url: 'http://localhost:' + port + '/',
-            query: { 'hello': 'world' },
+            query: {'hello': 'world'},
             body: {}
         };
 
@@ -141,7 +143,7 @@ test('request with default method', function t(assert) {
     var server = createServer(function onPort(port) {
         var treq = {
             url: 'http://localhost:' + port + '/',
-            body: { 'hello': 'world' }
+            body: {'hello': 'world'}
         };
 
         makeTypedRequest(treq, reqOpts, onResponse);
@@ -254,8 +256,8 @@ test('request that has transformUrlFn', function t(assert) {
         var treq = {
             method: 'GET',
             url: 'http://localhost:' + port + '/',
-            query: { prop: ['a,b', 'c,d']},
-            body: { 'hello': 'world' }
+            query: {prop: ['a,b', 'c,d']},
+            body: {'hello': 'world'}
         };
 
         var transformReqOpts = {

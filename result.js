@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = Result;
 
 function Result(type, error, ok) {

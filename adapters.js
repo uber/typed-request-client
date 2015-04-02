@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = {
     statsd: require('./adapters/statsd.js'),
     statsdMeasure: require('./adapters/statsd-measure.js'),
