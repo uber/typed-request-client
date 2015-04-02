@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = StatsdReportRequestMadeHandler;
 function StatsdReportRequestMadeHandler(requestHandler, options) {
     if (!(this instanceof StatsdReportRequestMadeHandler)) {

@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = writeStats;
 
 function writeStats(emitter, options) {

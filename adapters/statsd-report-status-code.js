@@ -1,3 +1,5 @@
+'use strict';
+
 // Variation on what exists in the typed-request package
 module.exports = StatsdReportStatusCodeHandler;
 function StatsdReportStatusCodeHandler(requestHandler, options) {

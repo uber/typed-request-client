@@ -1,6 +1,9 @@
+'use strict';
+
 var test = require('tape');
 var http = require('http');
 var sendJson = require('send-data/json');
+var setTimeout = require('timers').setTimeout;
 
 var TypedRequestClient = require('../index.js');
 
@@ -24,13 +27,13 @@ var fakeStatsd = {
 var requestSchema = {
     type: 'object',
     properties: {
-        'url': { type: 'string' },
-        'method': { type: 'string' },
-        'headers': { type: 'object' },
+        'url': {type: 'string'},
+        'method': {type: 'string'},
+        'headers': {type: 'object'},
         'body': {
             type: 'object',
             properties: {
-                'foo': { type: 'string' }
+                'foo': {type: 'string'}
             },
             required: ['foo']
         }
@@ -41,10 +44,10 @@ var requestSchema = {
 var responseSchema = {
     type: 'object',
     properties: {
-        'statusCode': { type: 'number' },
-        'httpVersion': { type: 'string' },
-        'headers': { type: 'object' },
-        'body': { type: 'object' }
+        'statusCode': {type: 'number'},
+        'httpVersion': {type: 'string'},
+        'headers': {type: 'object'},
+        'body': {type: 'object'}
     },
     required: ['statusCode', 'httpVersion', 'headers', 'body']
 };
@@ -77,7 +80,11 @@ test('can make http request', function t(assert) {
             timeout: 100,
             requestSchema: requestSchema,
             responseSchema: responseSchema,
-            resource: '.read'
+            resource: '.read',
+            filterRequest: true,
+            filterResponse: true,
+            validateRequest: true,
+            validateResponse: true
         }, onResponse);
 
         function onResponse(err, tres) {
@@ -101,7 +108,7 @@ test('passes 500 right through', function t(assert) {
     var server = http.createServer(function onReq(req, res) {
         sendJson(req, res, {
             statusCode: 500,
-            body: { message: 'sad' }
+            body: {message: 'sad'}
         });
     });
     server.listen(0, function onPort() {
@@ -134,7 +141,7 @@ test('passes 500 right through', function t(assert) {
             assert.equal(tres.statusCode, 500);
             assert.equal(tres.httpVersion, '1.1');
             // assert.deepEqual(tres.headers, {});
-            assert.deepEqual(tres.body, { message: 'sad' });
+            assert.deepEqual(tres.body, {message: 'sad'});
             assert.deepEqual(Object.keys(tres), [
                  'httpVersion', 'headers', 'statusCode', 'body'
             ]);

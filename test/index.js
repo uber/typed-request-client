@@ -1,3 +1,5 @@
+'use strict';
+
 require('./make-typed-request.js');
 require('./result.js');
 require('./validate-shape.js');

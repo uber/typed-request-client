@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = StatsdMeasureClient;
 function StatsdMeasureClient(requestHandler, options, metricName) {
     if (!(this instanceof StatsdMeasureClient)) {

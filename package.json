@@ -1,6 +1,6 @@
 {
   "name": "typed-request-client",
-  "version": "5.0.1",
+  "version": "6.0.0",
   "description": "Make HTTP requests using TypedRequest and TypedResponse objects.",
   "keywords": [],
   "author": "Raynos <raynos2@gmail.com>",
@@ -26,14 +26,15 @@
     "body": "^4.5.0",
     "coveralls": "^2.10.0",
     "format-stack": "^2.0.0",
-    "istanbul": "^0.2.16",
+    "istanbul": "^0.3.13",
     "jscs": "^1.6.2",
     "jshint": "^2.5.0",
     "opn": "^0.1.2",
     "pre-commit": "0.0.5",
     "send-data": "^3.3.3",
     "tap-spec": "^0.1.8",
-    "tape": "^3.0.0"
+    "tape": "^3.0.0",
+    "lint-trap": "^1.0.1"
   },
   "licenses": [
     {
@@ -45,7 +46,7 @@
     "test": "npm run jshint -s && npm run cover -s",
     "fast-test": "npm run cover -s",
     "jshint-pre-commit": "jshint --verbose $(git diff --cached --name-only --diff-filter=ACMRTUXB | grep '\\.js$')",
-    "jshint": "jshint --verbose . && jscs .",
+    "jshint": "lint-trap",
     "cover": "istanbul cover --report html --print detail test/index.js && istanbul check-coverage --lines=100 --branches=100",
     "view-cover": "istanbul report html && opn ./coverage/index.html",
     "travis": "npm run cover -s && istanbul report lcov && ((cat coverage/lcov.info | coveralls) || exit 0)"
