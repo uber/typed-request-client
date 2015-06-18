@@ -1,6 +1,7 @@
 'use strict';
 
 var querystring = require('querystring');
+var xtend = require('xtend');
 
 var DEFUALT_TIMEOUT = 30 * 1000;
 
@@ -16,6 +17,10 @@ function makeTypedRequest(treq, opts, cb) {
         timeout: opts.timeout || DEFUALT_TIMEOUT,
         transformUrlFn: opts.transformUrlFn || undefined
     };
+
+    if (opts.requestOpts) {
+        reqOpts = xtend(reqOpts, opts.requestOpts);
+    }
 
     if (treq.body !== undefined) {
         reqOpts.json = treq.body;

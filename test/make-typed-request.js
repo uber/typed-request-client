@@ -21,6 +21,10 @@ function createServer(onPort) {
     return server;
 
     function onRequest(req, res) {
+        if (req.url === '/redirect') {
+            res.writeHead(301, {location: '/'});
+            return res.end();
+        }
         parseJSON(req, res, onJSON);
 
         function onJSON(err, json) {
@@ -285,6 +289,36 @@ test('request that has transformUrlFn', function t(assert) {
 
         function onResponse(err, resp) {
             assert.ifError(err);
+
+            server.close();
+            assert.end();
+        }
+    });
+});
+
+test('can make request with custom request options', function t(assert) {
+    var server = createServer(function onPort(port) {
+        var treq = {
+            method: 'GET',
+            url: 'http://localhost:' + port + '/redirect',
+            body: {'hello': 'world'}
+        };
+
+        var extendedReqOpts = {
+            request: request,
+            requestOpts: {
+                followRedirect: false
+            }
+        };
+
+        makeTypedRequest(treq, extendedReqOpts, onResponse);
+
+        function onResponse(err, resp) {
+            assert.ifError(err);
+
+            assert.equal(resp.httpVersion, '1.1');
+            assert.ok(resp.headers);
+            assert.equal(resp.statusCode, 301);
 
             server.close();
             assert.end();
