@@ -568,8 +568,6 @@ test('can make request with prober enabled', function t(assert) {
         }
     };
 
-    console.log(request);
-
     request(treq, {
         requestSchema: requestSchema,
         responseSchema: responseSchema,
@@ -642,8 +640,6 @@ test('can make request without prober enabled', function t(assert) {
             'foo': 'bar'
         }
     };
-
-    console.log(request);
 
     request(treq, {
         requestSchema: requestSchema,
