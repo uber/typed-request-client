@@ -18,7 +18,7 @@ function ProbingRequestHandler(requestHandler, options) {
     }
 
     this.prober = options.prober = Prober({
-        enabled: true,
+        enabled: options.proberEnabled === false ? false : true,
         title: 'typed-request-client.' + options.clientName,
         statsd: options.statsd
     });

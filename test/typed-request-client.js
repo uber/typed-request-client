@@ -529,6 +529,155 @@ test('can make request without filtering response', function t(assert) {
     }
 });
 
+test('can make request with prober enabled', function t(assert) {
+    fakeStatsd.stats = [];
+    var request = TypedRequestClient({
+        clientName: 'demo',
+        statsd: fakeStatsd,
+        // Prober should be enabled
+        request: function r(opts, cb) {
+            assert.equal(opts.url, 'http://localhost:8000/');
+            assert.equal(opts.method, 'GET');
+            assert.deepEqual(opts.headers, {});
+            assert.equal(opts.timeout, 30000);
+            assert.deepEqual(opts.json, {
+                'foo': 'bar'
+            });
+
+            assert.deepEqual(Object.keys(opts).sort(), [
+                'headers', 'json', 'method', 'timeout', 'transformUrlFn', 'url'
+            ]);
+
+            cb(null, {
+                statusCode: 200,
+                httpVersion: '1.1',
+                headers: {},
+                body: {
+                    'moo': 'invalid-property'
+                }
+            });
+        }
+    });
+
+    var treq = {
+        url: 'http://localhost:8000/',
+        method: 'GET',
+        headers: {},
+        body: {
+            'foo': 'bar'
+        }
+    };
+
+    console.log(request);
+
+    request(treq, {
+        requestSchema: requestSchema,
+        responseSchema: responseSchema,
+        resource: '.read',
+        filterRequest: true,
+        filterResponse: false,
+        validateRequest: true,
+        validateResponse: false
+    }, onResponse);
+
+    function onResponse(err, tres) {
+        assert.ifError(err);
+
+        assert.equal(tres.statusCode, 200);
+        assert.equal(tres.httpVersion, '1.1');
+        assert.deepEqual(tres.headers, {});
+        assert.deepEqual(tres.body, {
+            'moo': 'invalid-property'
+        });
+        assert.deepEqual(Object.keys(tres).sort(), [
+            'body', 'headers', 'httpVersion', 'statusCode'
+        ]);
+        var statsed = false;
+        fakeStatsd.stats.forEach(function(stat) {
+            if (stat.key.indexOf('prober') !== -1) {
+                statsed = true;
+            }
+        });
+        assert.ok(statsed, 'Prober fired');
+
+        assert.end();
+    }
+});
+
+test('can make request without prober enabled', function t(assert) {
+    fakeStatsd.stats = [];
+    var request = TypedRequestClient({
+        clientName: 'demo',
+        statsd: fakeStatsd,
+        proberEnabled: false,
+        request: function r(opts, cb) {
+            assert.equal(opts.url, 'http://localhost:8000/');
+            assert.equal(opts.method, 'GET');
+            assert.deepEqual(opts.headers, {});
+            assert.equal(opts.timeout, 30000);
+            assert.deepEqual(opts.json, {
+                'foo': 'bar'
+            });
+
+            assert.deepEqual(Object.keys(opts).sort(), [
+                'headers', 'json', 'method', 'timeout', 'transformUrlFn', 'url'
+            ]);
+
+            cb(null, {
+                statusCode: 200,
+                httpVersion: '1.1',
+                headers: {},
+                body: {
+                    'moo': 'invalid-property'
+                }
+            });
+        }
+    });
+
+    var treq = {
+        url: 'http://localhost:8000/',
+        method: 'GET',
+        headers: {},
+        body: {
+            'foo': 'bar'
+        }
+    };
+
+    console.log(request);
+
+    request(treq, {
+        requestSchema: requestSchema,
+        responseSchema: responseSchema,
+        resource: '.read',
+        filterRequest: true,
+        filterResponse: false,
+        validateRequest: true,
+        validateResponse: false
+    }, onResponse);
+
+    function onResponse(err, tres) {
+        assert.ifError(err);
+
+        assert.equal(tres.statusCode, 200);
+        assert.equal(tres.httpVersion, '1.1');
+        assert.deepEqual(tres.headers, {});
+        assert.deepEqual(tres.body, {
+            'moo': 'invalid-property'
+        });
+        assert.deepEqual(Object.keys(tres).sort(), [
+            'body', 'headers', 'httpVersion', 'statusCode'
+        ]);
+
+        fakeStatsd.stats.forEach(function(stat) {
+            if (stat.key.indexOf('prober') !== -1) {
+                assert.fail("Prober fired a statsd when it should be disabled");
+            }
+        });
+
+        assert.end();
+    }
+});
+
 test('can return error validating response', function t(assert) {
     var request = TypedRequestClient({
         clientName: 'demo',
