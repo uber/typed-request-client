@@ -12,6 +12,7 @@ function makeTypedRequest(treq, opts, cb) {
 
     var reqOpts = {
         url: treq.url,
+        uuid : (treq.uuid ? treq.uuid : ''),
         method: treq.method || 'GET',
         headers: treq.headers || {},
         timeout: opts.timeout || DEFUALT_TIMEOUT,
