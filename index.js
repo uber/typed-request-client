@@ -20,5 +20,11 @@ function TypedRequestClient(options) {
         .statsd(options)
         .valueOf();
 
-    return requestHandler.request.bind(requestHandler);
+    var request = requestHandler.request.bind(requestHandler);
+
+    request.setProberEnabled = function setProberEnabled(enabled) {
+        requestHandler.options.prober.setEnabled(enabled);
+    };
+
+    return request;
 }
