@@ -15,11 +15,13 @@ function handleReportingRequest(request, requestOptions, handleResponse) {
     var self = this;
     self.requestHandler.request(request, requestOptions, onResponse);
     function onResponse(error, response) {
-        if (error) {
-            return handleResponse(error);
-        }
         var resource = requestOptions.resource;
         var statsEmitter = self.options.statsEmitter;
+        if (error) {
+            // report 500 for client errors, e.g. ETIMEDOUT, ESOCKETTIMEDOUT
+            statsEmitter.emit('statusCode', resource, 500);
+            return handleResponse(error);
+        }
         statsEmitter.emit('statusCode', resource, response.statusCode);
         handleResponse(null, response);
     }

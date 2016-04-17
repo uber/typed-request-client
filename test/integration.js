@@ -7,22 +7,36 @@ var setTimeout = require('timers').setTimeout;
 
 var TypedRequestClient = require('../index.js');
 
-var fakeStatsd = {
-    stats: [],
-    increment: function increment(key) {
-        this.stats.push({
-            type: 'increment',
-            key: key
-        });
-    },
-    timing: function timing(key, delta) {
-        this.stats.push({
-            type: 'timing',
-            key: key,
-            delta: delta
-        });
-    }
-};
+function createFakeStatsd(assert) {
+    return {
+        stats: [],
+        increment: function increment(key) {
+            this.stats.push({
+                type: 'increment',
+                key: key
+            });
+        },
+        timing: function timing(key, delta) {
+            this.stats.push({
+                type: 'timing',
+                key: key,
+                delta: delta
+            });
+        },
+        assertStat: function assertStat(stat, times) {
+            var foundTimes = 0;
+            for (var i = 0; i < this.stats.length; i++) {
+                if (this.stats[i].type === stat.type &&
+                    this.stats[i].key === stat.key &&
+                    this.stats[i].delta === stat.delta) {
+                    foundTimes++;
+                }
+            }
+            assert.equal(times, foundTimes,
+                'cannot find stat of expected times');
+        }
+    };
+}
 
 var requestSchema = {
     type: 'object',
@@ -64,7 +78,7 @@ test('can make http request', function t(assert) {
 
         var request = TypedRequestClient({
             clientName: 'demo',
-            statsd: fakeStatsd
+            statsd: createFakeStatsd(assert)
         });
 
         var treq = {
@@ -80,7 +94,7 @@ test('can make http request', function t(assert) {
             timeout: 100,
             requestSchema: requestSchema,
             responseSchema: responseSchema,
-            resource: '.read',
+            resource: 'read',
             filterRequest: true,
             filterResponse: true,
             validateRequest: true,
@@ -116,7 +130,7 @@ test('passes 500 right through', function t(assert) {
 
         var request = TypedRequestClient({
             clientName: 'demo',
-            statsd: fakeStatsd
+            statsd: createFakeStatsd(assert)
         });
 
         var treq = {
@@ -132,7 +146,7 @@ test('passes 500 right through', function t(assert) {
             timeout: 100,
             requestSchema: requestSchema,
             responseSchema: responseSchema,
-            resource: '.read'
+            resource: 'read'
         }, onResponse);
 
         function onResponse(err, tres) {
@@ -165,9 +179,10 @@ test('respects timeout', function t(assert) {
     server.listen(0, function onPort() {
         var port = server.address().port;
 
+        var statsd = createFakeStatsd(assert);
         var request = TypedRequestClient({
             clientName: 'demo',
-            statsd: fakeStatsd
+            statsd: statsd
         });
 
         var treq = {
@@ -183,7 +198,7 @@ test('respects timeout', function t(assert) {
             timeout: 100,
             requestSchema: requestSchema,
             responseSchema: responseSchema,
-            resource: '.read'
+            resource: 'read'
         }, onResponse);
 
         function onResponse(err) {
@@ -192,6 +207,10 @@ test('respects timeout', function t(assert) {
                 err.code === 'ESOCKETTIMEDOUT'
             );
             server.close();
+            statsd.assertStat({
+                type: 'increment',
+                key: 'typed-request-client.demo.read.statusCode.500'
+            }, 1);
             assert.end();
         }
     });
