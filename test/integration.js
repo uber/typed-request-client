@@ -76,9 +76,10 @@ test('can make http request', function t(assert) {
     server.listen(0, function onPort() {
         var port = server.address().port;
 
+        var statsd = createFakeStatsd(assert);
         var request = TypedRequestClient({
             clientName: 'demo',
-            statsd: createFakeStatsd(assert)
+            statsd: statsd
         });
 
         var treq = {
@@ -112,6 +113,15 @@ test('can make http request', function t(assert) {
                 'statusCode', 'httpVersion', 'headers', 'body'
             ]);
 
+            statsd.assertStat({
+                type: 'increment',
+                key: 'typed-request-client.demo.read.statusCode.200'
+            }, 1);
+            statsd.assertStat({
+                type: 'increment',
+                key: 'typed-request-client.demo.read.request-all'
+            }, 1);
+
             server.close();
             assert.end();
         }
@@ -128,9 +138,10 @@ test('passes 500 right through', function t(assert) {
     server.listen(0, function onPort() {
         var port = server.address().port;
 
+        var statsd = createFakeStatsd(assert);
         var request = TypedRequestClient({
             clientName: 'demo',
-            statsd: createFakeStatsd(assert)
+            statsd: statsd
         });
 
         var treq = {
@@ -159,6 +170,20 @@ test('passes 500 right through', function t(assert) {
             assert.deepEqual(Object.keys(tres), [
                  'httpVersion', 'headers', 'statusCode', 'body'
             ]);
+
+            statsd.assertStat({
+                type: 'increment',
+                key: 'typed-request-client.demo.read.statusCode.500'
+            }, 1);
+            statsd.assertStat({
+                type: 'increment',
+                key: 'typed-request-client.demo.read' +
+                    '.request-failed.server-error.500'
+            }, 1);
+            statsd.assertStat({
+                type: 'increment',
+                key: 'typed-request-client.demo.read.request-all'
+            }, 1);
 
             server.close();
             assert.end();
@@ -209,7 +234,11 @@ test('respects timeout', function t(assert) {
             server.close();
             statsd.assertStat({
                 type: 'increment',
-                key: 'typed-request-client.demo.read.statusCode.500'
+                key: 'typed-request-client.demo.read.request-failed.client-error.ETIMEDOUT'
+            }, 1);
+            statsd.assertStat({
+                type: 'increment',
+                key: 'typed-request-client.demo.read.request-all'
             }, 1);
             assert.end();
         }

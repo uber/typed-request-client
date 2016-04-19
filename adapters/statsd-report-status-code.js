@@ -17,12 +17,17 @@ function handleReportingRequest(request, requestOptions, handleResponse) {
     function onResponse(error, response) {
         var resource = requestOptions.resource;
         var statsEmitter = self.options.statsEmitter;
+        statsEmitter.emit('requestResult', resource, 'request-all');
         if (error) {
-            // report 500 for client errors, e.g. ETIMEDOUT, ESOCKETTIMEDOUT
-            statsEmitter.emit('statusCode', resource, 500);
+            statsEmitter.emit('requestResult', resource,
+                'request-failed.client-error', error.code || 'unknown');
             return handleResponse(error);
         }
         statsEmitter.emit('statusCode', resource, response.statusCode);
+        if (response.statusCode >= 400 && response.statusCode <= 599) {
+            statsEmitter.emit('requestResult', resource,
+                'request-failed.server-error', response.statusCode);
+        }
         handleResponse(null, response);
     }
 };

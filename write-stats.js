@@ -9,6 +9,7 @@ function writeStats(emitter, options) {
     emitter.on('makeRequest', onMakeRequest);
     emitter.on('requestTime', onRequestTime);
     emitter.on('statusCode', onStatusCode);
+    emitter.on('requestResult', onRequestResult);
     emitter.on('totalTime', onTotalTime);
 
     function sanitize(statStr) {
@@ -28,6 +29,15 @@ function writeStats(emitter, options) {
     function onStatusCode(resource, statusCode) {
         statsd.increment(sanitize('typed-request-client.' + clientName +
             '.' + resource + '.statusCode.' + statusCode));
+    }
+
+    function onRequestResult(resource, requestResultType, errorCode) {
+        var stat = 'typed-request-client.' + clientName +
+            '.' + resource + '.' + requestResultType;
+        if (errorCode) {
+            stat += '.' + errorCode;
+        }
+        statsd.increment(sanitize(stat));
     }
 
     function onTotalTime(resource, delta) {
