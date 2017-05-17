@@ -29,8 +29,10 @@ function makeTypedRequest(treq, opts, cb) {
     }
 
     if (treq.query) {
-        reqOpts.url = reqOpts.url + '?' +
-            querystring.stringify(treq.query);
+        var query = querystring.stringify(treq.query);
+        if (query !== '') {
+            reqOpts.url = reqOpts.url + '?' + query;
+        }
     }
 
     if (typeof reqOpts.transformUrlFn === 'function') {

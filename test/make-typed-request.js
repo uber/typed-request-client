@@ -113,7 +113,7 @@ test('request with POST', function t(assert) {
     });
 });
 
-test('request with GET', function t(assert) {
+test('request with GET w/ query', function t(assert) {
     var server = createServer(function onPort(port) {
         var treq = {
             method: 'GET',
@@ -134,6 +134,36 @@ test('request with GET', function t(assert) {
             assert.deepEqual(resp.body, {
                 method: 'GET',
                 url: '/?hello=world',
+                req: {}
+            });
+
+            server.close();
+            assert.end();
+        }
+    });
+});
+
+test('request with GET w/o query', function t(assert) {
+    var server = createServer(function onPort(port) {
+        var treq = {
+            method: 'GET',
+            url: 'http://localhost:' + port + '/',
+            query: {},
+            body: {}
+        };
+
+        makeTypedRequest(treq, reqOpts, onResponse);
+
+        function onResponse(err, resp) {
+            assert.ifError(err);
+
+            assert.equal(resp.httpVersion, '1.1');
+            assert.ok(resp.headers);
+            assert.equal(resp.headers['content-type'],
+                'application/json');
+            assert.deepEqual(resp.body, {
+                method: 'GET',
+                url: '/',
                 req: {}
             });
 
