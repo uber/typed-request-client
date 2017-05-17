@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('underscore');
 var querystring = require('querystring');
 var xtend = require('xtend');
 
@@ -28,7 +29,7 @@ function makeTypedRequest(treq, opts, cb) {
         reqOpts.json = true;
     }
 
-    if (treq.query) {
+    if (treq.query && !_.isEmpty(treq.query)) {
         reqOpts.url = reqOpts.url + '?' +
             querystring.stringify(treq.query);
     }
