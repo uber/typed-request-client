@@ -1,6 +1,5 @@
 'use strict';
 
-var _ = require('underscore');
 var querystring = require('querystring');
 var xtend = require('xtend');
 
@@ -29,9 +28,11 @@ function makeTypedRequest(treq, opts, cb) {
         reqOpts.json = true;
     }
 
-    if (treq.query && !_.isEmpty(treq.query)) {
-        reqOpts.url = reqOpts.url + '?' +
-            querystring.stringify(treq.query);
+    if (treq.query) {
+        var query = querystring.stringify(treq.query);
+        if (query !== '') {
+            reqOpts.url = reqOpts.url + '?' + query;
+        }
     }
 
     if (typeof reqOpts.transformUrlFn === 'function') {
